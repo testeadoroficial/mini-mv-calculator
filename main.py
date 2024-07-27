@@ -13,7 +13,6 @@ class MargenVariable:
         self.psr = psr
 
     def calcular_margen_variable(self):
-        """Calcula el margen variable."""
         margen_operativo = self.eg * (self.pse - self.cv)
         margen_comercial = self.ev * (self.pv - self.psr)
         return margen_operativo + margen_comercial
@@ -55,16 +54,19 @@ class Interfaz:
         self.entry_psr = tk.Entry(self.root)
         self.entry_psr.grid(row=5, column=1)
 
-        # Botones
+        # Botón "Calcular"
         self.button_calcular = tk.Button(self.root, text="Calcular", command=self.calcular_mv)
         self.button_calcular.grid(row=6, column=0, columnspan=2)
 
+        # Botón "Limpiar"
         self.button_limpiar = tk.Button(self.root, text="Limpiar", command=self.limpiar_campos)
         self.button_limpiar.grid(row=7, column=0, columnspan=2)
 
+        # Botón "Guardar Escenario"
         self.button_guardar = tk.Button(self.root, text="Guardar Escenario", command=self.guardar_escenario)
         self.button_guardar.grid(row=8, column=0, columnspan=2)
 
+        # Botón "Cargar Escenario"
         self.button_cargar = tk.Button(self.root, text="Cargar Escenario", command=self.cargar_escenario)
         self.button_cargar.grid(row=9, column=0, columnspan=2)
 
