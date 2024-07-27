@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import messagebox
 import json
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 # Clase para gestionar el Margen Variable
 class MargenVariable:
@@ -70,9 +72,19 @@ class Interfaz:
         self.button_cargar = tk.Button(self.root, text="Cargar Escenario", command=self.cargar_escenario)
         self.button_cargar.grid(row=9, column=0, columnspan=2)
 
+        # Botón "Analizar Sensibilidad"
+        self.button_sensibilidad = tk.Button(self.root, text="Analizar Sensibilidad", command=self.analizar_sensibilidad)
+        self.button_sensibilidad.grid(row=10, column=0, columnspan=2)
+
         # Etiqueta para mostrar el resultado
         self.label_resultado = tk.Label(self.root, text="")
-        self.label_resultado.grid(row=10, column=0, columnspan=2)
+        self.label_resultado.grid(row=11, column=0, columnspan=2)
+
+        # Área para el gráfico
+        self.fig, self.ax = plt.subplots()
+        self.canvas = FigureCanvasTkAgg(self.fig, master=self.root)
+        self.canvas.draw()
+        self.canvas.get_tk_widget().grid(row=12, column=0, columnspan=2)
 
         self.root.mainloop()
 
@@ -104,6 +116,8 @@ class Interfaz:
         self.entry_pv.delete(0, tk.END)
         self.entry_psr.delete(0, tk.END)
         self.label_resultado.config(text="")
+        self.ax.clear()
+        self.canvas.draw()
 
     def guardar_escenario(self):
         try:
@@ -158,6 +172,40 @@ class Interfaz:
 
         except FileNotFoundError:
             messagebox.showerror("Error", "No se encontró el archivo de escenario.")
+
+    def analizar_sensibilidad(self):
+        try:
+            eg = float(self.entry_eg.get())
+            pse = float(self.entry_pse.get())
+            cv = float(self.entry_cv.get())
+            ev = float(self.entry_ev.get())
+            pv = float(self.entry_pv.get())
+            psr = float(self.entry_psr.get())
+
+            # Validaciones adicionales:
+            if eg <= 0 or pse <= 0 or cv <= 0 or ev <= 0 or pv <= 0 or psr <= 0:
+                messagebox.showerror("Error", "Por favor, ingrese valores numéricos positivos.")
+                return
+
+            # Rango de valores para el análisis de sensibilidad
+            rango_pse = range(40, 61, 5)
+
+            # Calcular el margen variable para cada valor de PSe
+            mvs = []
+            for pse_valor in rango_pse:
+                mv = MargenVariable(eg, pse_valor, cv, ev, pv, psr).calcular_margen_variable()
+                mvs.append(mv)
+
+            # Graficar los resultados
+            self.ax.clear()
+            self.ax.plot(rango_pse, mvs)
+            self.ax.set_xlabel("Precio Spot Entrega ($/MWh)")
+            self.ax.set_ylabel("Margen Variable")
+            self.ax.set_title("Análisis de Sensibilidad")
+            self.canvas.draw()
+
+        except ValueError:
+            messagebox.showerror("Error", "Por favor, ingrese valores numéricos válidos.")
 
 # Ejecutar la interfaz gráfica
 if __name__ == "__main__":
