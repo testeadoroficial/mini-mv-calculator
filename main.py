@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import messagebox
 
 # Clase para gestionar el Margen Variable
 class MargenVariable:
@@ -56,9 +57,13 @@ class Interfaz:
         self.button_calcular = tk.Button(self.root, text="Calcular", command=self.calcular_mv)
         self.button_calcular.grid(row=6, column=0, columnspan=2)
 
+        # Botón "Limpiar"
+        self.button_limpiar = tk.Button(self.root, text="Limpiar", command=self.limpiar_campos)
+        self.button_limpiar.grid(row=7, column=0, columnspan=2)
+
         # Etiqueta para mostrar el resultado
         self.label_resultado = tk.Label(self.root, text="")
-        self.label_resultado.grid(row=7, column=0, columnspan=2)
+        self.label_resultado.grid(row=8, column=0, columnspan=2)
 
         self.root.mainloop()
 
@@ -71,11 +76,25 @@ class Interfaz:
             pv = float(self.entry_pv.get())
             psr = float(self.entry_psr.get())
 
+            # Validaciones adicionales:
+            if eg <= 0 or pse <= 0 or cv <= 0 or ev <= 0 or pv <= 0 or psr <= 0:
+                messagebox.showerror("Error", "Por favor, ingrese valores numéricos positivos.")
+                return
+
             margen_variable = MargenVariable(eg, pse, cv, ev, pv, psr).calcular_margen_variable()
             self.label_resultado.config(text=f"Margen Variable: {margen_variable:.2f}")
 
         except ValueError:
-            self.label_resultado.config(text="Por favor, ingrese valores numéricos válidos.")
+            messagebox.showerror("Error", "Por favor, ingrese valores numéricos válidos.")
+
+    def limpiar_campos(self):
+        self.entry_eg.delete(0, tk.END)
+        self.entry_pse.delete(0, tk.END)
+        self.entry_cv.delete(0, tk.END)
+        self.entry_ev.delete(0, tk.END)
+        self.entry_pv.delete(0, tk.END)
+        self.entry_psr.delete(0, tk.END)
+        self.label_resultado.config(text="")
 
 # Ejecutar la interfaz gráfica
 if __name__ == "__main__":
