@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
+import json
 
 # Clase para gestionar el Margen Variable
 class MargenVariable:
@@ -12,6 +13,7 @@ class MargenVariable:
         self.psr = psr
 
     def calcular_margen_variable(self):
+        """Calcula el margen variable."""
         margen_operativo = self.eg * (self.pse - self.cv)
         margen_comercial = self.ev * (self.pv - self.psr)
         return margen_operativo + margen_comercial
@@ -53,17 +55,22 @@ class Interfaz:
         self.entry_psr = tk.Entry(self.root)
         self.entry_psr.grid(row=5, column=1)
 
-        # Botón "Calcular"
+        # Botones
         self.button_calcular = tk.Button(self.root, text="Calcular", command=self.calcular_mv)
         self.button_calcular.grid(row=6, column=0, columnspan=2)
 
-        # Botón "Limpiar"
         self.button_limpiar = tk.Button(self.root, text="Limpiar", command=self.limpiar_campos)
         self.button_limpiar.grid(row=7, column=0, columnspan=2)
 
+        self.button_guardar = tk.Button(self.root, text="Guardar Escenario", command=self.guardar_escenario)
+        self.button_guardar.grid(row=8, column=0, columnspan=2)
+
+        self.button_cargar = tk.Button(self.root, text="Cargar Escenario", command=self.cargar_escenario)
+        self.button_cargar.grid(row=9, column=0, columnspan=2)
+
         # Etiqueta para mostrar el resultado
         self.label_resultado = tk.Label(self.root, text="")
-        self.label_resultado.grid(row=8, column=0, columnspan=2)
+        self.label_resultado.grid(row=10, column=0, columnspan=2)
 
         self.root.mainloop()
 
@@ -95,6 +102,60 @@ class Interfaz:
         self.entry_pv.delete(0, tk.END)
         self.entry_psr.delete(0, tk.END)
         self.label_resultado.config(text="")
+
+    def guardar_escenario(self):
+        try:
+            eg = float(self.entry_eg.get())
+            pse = float(self.entry_pse.get())
+            cv = float(self.entry_cv.get())
+            ev = float(self.entry_ev.get())
+            pv = float(self.entry_pv.get())
+            psr = float(self.entry_psr.get())
+
+            escenario = {
+                "eg": eg,
+                "pse": pse,
+                "cv": cv,
+                "ev": ev,
+                "pv": pv,
+                "psr": psr
+            }
+
+            with open("escenario.json", "w") as archivo:
+                json.dump(escenario, archivo)
+
+            messagebox.showinfo("Guardado", "Escenario guardado correctamente.")
+
+        except ValueError:
+            messagebox.showerror("Error", "Por favor, ingrese valores numéricos válidos.")
+
+    def cargar_escenario(self):
+        try:
+            with open("escenario.json", "r") as archivo:
+                escenario = json.load(archivo)
+
+            self.entry_eg.delete(0, tk.END)
+            self.entry_eg.insert(0, str(escenario["eg"]))
+
+            self.entry_pse.delete(0, tk.END)
+            self.entry_pse.insert(0, str(escenario["pse"]))
+
+            self.entry_cv.delete(0, tk.END)
+            self.entry_cv.insert(0, str(escenario["cv"]))
+
+            self.entry_ev.delete(0, tk.END)
+            self.entry_ev.insert(0, str(escenario["ev"]))
+
+            self.entry_pv.delete(0, tk.END)
+            self.entry_pv.insert(0, str(escenario["pv"]))
+
+            self.entry_psr.delete(0, tk.END)
+            self.entry_psr.insert(0, str(escenario["psr"]))
+
+            messagebox.showinfo("Cargado", "Escenario cargado correctamente.")
+
+        except FileNotFoundError:
+            messagebox.showerror("Error", "No se encontró el archivo de escenario.")
 
 # Ejecutar la interfaz gráfica
 if __name__ == "__main__":
